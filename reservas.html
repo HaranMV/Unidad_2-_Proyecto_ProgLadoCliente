@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="Styles.css" rel="stylesheet">
+    <title>Principal</title>
+</head>
+
+<body>
+
+<header>
+    <h1>Mis Reservas</h1>
+     <nav>
+        <ul class="nav">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="reservas.html">Mis Reservas</a></li>            
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <div id="listaReservas" class="reservasContenedor"></div>
+</main>
+
+<footer>
+    <p>&copy; Developed by Alfredo Haran Mata Villa</p>
+</footer>
+
+
+
+<script>
+    const lista = document.getElementById("listaReservas");
+    const reservas = JSON.parse(localStorage.getItem("reservas")) || [];
+
+      const peliculas = [
+            {
+                id:1,
+                nombre: "Avengers Endgame",
+                duracion: "3h 2m",
+                horario: "7:00 pm",
+                sala: "1",
+                imagen: "https://i.imgur.com/WN8uOOK.jpeg"
+            },
+            {
+                id: 2,
+                nombre: "Joker",
+                duracion: "2h 28m",
+                horario: "9:00 pm",
+                sala:"2",
+                imagen: "https://images.abandomoviez.net/db/foto/db_35588_15.jpg"                
+            },
+            {
+                id:3,
+                nombre: "Aniquilación",
+                duracion: "2h 18min",
+                horario: "10:00 pm",
+                sala:"3",
+                imagen: "https://es.web.img3.acsta.net/c_310_420/pictures/18/02/22/11/29/1055344.jpg"
+            },
+            {
+                id:4,
+                nombre: "Godzilla x Kong: El Nuevo Imperio",
+                duracion: "1h 54min",
+                horario: "5:00 pm",
+                sala:"4",
+                imagen: "https://static.wikia.nocookie.net/doblaje/images/8/82/GyK_poster.jpg/revision/latest/scale-to-width-down/1000?cb=20240216164435&path-prefix=es"
+            },
+              {
+                id:5,
+                nombre: "Guerra Mundial Z",
+                duracion: "1h 56min",
+                horario: "11:00 pm",
+                sala:"5",
+                imagen: "https://im.ziffdavisinternational.com/ign_es//n/new-poster-for-brad-pitts-world-war-z-revealed/new-poster-for-brad-pitts-world-war-z-revealed_brm7.jpg"
+            }
+            
+        ];
+    
+   function mostrarReservas() {
+  lista.innerHTML = "";
+
+  if (reservas.length === 0) {
+    lista.innerHTML = "<p>No tienes reservas aún.</p>";
+    return;
+  }
+
+  reservas.forEach((reserva, index) => {
+    const pelicula = peliculas.find(p => p.id == reserva.pelicula);
+    const total = reserva.asientos.length * 50;
+
+    const div = document.createElement("div");
+    div.classList.add("tarjetaReserva");
+    div.innerHTML = `
+      <img src="${pelicula?.imagen}" alt="${pelicula?.nombre}">
+      <div class="infoReserva">
+        <h3>${pelicula?.nombre}</h3>
+        <p><b>Asientos:</b> ${reserva.asientos.join(", ")}</p>
+        <p><b>Fecha:</b> ${reserva.fecha}</p>
+        <p><b>Total pagado:</b> $${total} MXN</p>
+        <button class="btnCancelarReserva" data-index="${index}">Cancelar reserva</button>
+      </div>
+    `;
+    lista.appendChild(div);
+  });
+  
+  document.querySelectorAll(".btnCancelarReserva").forEach(btn => {
+    btn.addEventListener("click", cancelarReserva);
+  });
+}
+
+function cancelarReserva(e) {
+  const index = e.target.dataset.index;
+  const reserva = reservas[index];
+
+  if (!confirm("¿Desea cancelar esta reserva?")) return;  
+  const storageKey = "asientosOcupados_" + reserva.pelicula;
+  let asientosGuardados = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+  reserva.asientos.forEach(a => {
+    asientosGuardados = asientosGuardados.filter(x => x !== a);
+  });
+
+  localStorage.setItem(storageKey, JSON.stringify(asientosGuardados));
+  
+  reservas.splice(index, 1);
+  localStorage.setItem("reservas", JSON.stringify(reservas));
+
+  alert("Reserva cancelada!");
+  
+  mostrarReservas();
+}
+
+mostrarReservas();
+        
+</script>
+</body>
+</html>
